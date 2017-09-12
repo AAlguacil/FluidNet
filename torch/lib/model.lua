@@ -88,6 +88,7 @@ function torch.defineModelGraph(conf, mconf, data)
     div:annotate{name = 'div'}
   end
 
+  print('local scale')
   local scale
   if mconf.normalizeInput then
     local scaleNet = nn.Sequential()
@@ -130,6 +131,7 @@ function torch.defineModelGraph(conf, mconf, data)
     end
   end
 
+  print('pmodelinput')
   local pModelInput
   local inputChannels = {}
   if mconf.inputChannels.pDiv then
@@ -237,6 +239,7 @@ function torch.defineModelGraph(conf, mconf, data)
      error('Incorrect modelType for 3D model.')
    end
   end
+  print('end model')
 
   -- NOTE: The last layer is somewhat special (since the number of osize is
   -- always 1, we don't ever do pooling and we may or may not concatenate
@@ -351,6 +354,7 @@ function torch.defineModelGraph(conf, mconf, data)
     inDims = osize[lid]
   end
 
+  print('hl')
   assert(#hl == 1, 'Last layer should get a single res bank')
   hl = hl[1]
 
@@ -386,6 +390,8 @@ function torch.defineModelGraph(conf, mconf, data)
     U = nn.ApplyScale(false)({U, scale})
   end
 
+  print('setwall')
+
   -- Now (as we do in Manta) call setWallBcs again after velocity update.
   U = tfluids.SetWallBcs()({U, flags})
 
@@ -397,6 +403,7 @@ function torch.defineModelGraph(conf, mconf, data)
   local outputNodes = {p, U}
   local model = nn.gModule(inputNodes, outputNodes)
 
+  print('return model')
   return model
 end
 

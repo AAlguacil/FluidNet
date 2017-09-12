@@ -45,10 +45,13 @@ local tr = torch.loadSet(conf, 'tr') --Instance of DataBinary
 torch.makeGlobal('_tr', tr)
 local te = torch.loadSet(conf, 'te') --Instance of DataBinary
 torch.makeGlobal('_te', te)
+print("loaded data")
 
 -- ***************************** Create the model ******************************
 local mconf, model
+print('conf loadmodel')
 if conf.loadModel then
+  print('loadModel')
   local mpath = conf.modelDirname
   if conf.resumeTraining then
     mpath = mpath .. '_lastEpoch'
@@ -67,19 +70,24 @@ if conf.loadModel then
 
   conf.newModel = nil
 else
+  print('assert not resume')
   assert(not conf.resumeTraining,
          'Cant resume training without loading a model!')
   model, mconf = torch.defineModel(conf, tr) -- in model.lua
   model:cuda()
-  -- Visualize the model to file.
-  if torch.loadPackageSafe('learning.lua.file') == nil then
+  print('passed cuda')
+-- beniz: buggy
+-- Visualize the model to file.
+--  if torch.loadPackageSafe('learning.lua.file') == nil then
     -- If we're using the standard distro of torch.
-    graph.dot(model.fg, 'Forward Graph', conf.modelDirname .. '_fg')
-    graph.dot(model.bg, 'Backward Graph', conf.modelDirname .. '_bg')
-  end
+--    graph.dot(model.fg, 'Forward Graph', conf.modelDirname .. '_fg')
+--   graph.dot(model.bg, 'Backward Graph', conf.modelDirname .. '_bg')
+--  end
+  print('passed loadpackagesafe')
 end
 torch.makeGlobal('_mconf', mconf)
 torch.makeGlobal('_model', model)
+print('global ok')
 
 -- ********************* Define Criterion (loss) function **********************
 print '==> defining loss function'
@@ -139,6 +147,7 @@ _te:plotDataStatistics(teMean, teStd, teL2)
 
 -- ************************ Profile the model for the paper ********************
 if conf.profile then
+  print('conf profile')
   local res = 128  -- The 3D data is 64x64x64 (which isn't that interesting).
   local profileTime = 10
   print('==> Profiling FPROP for ' ..  profileTime .. ' seconds' ..
@@ -151,6 +160,7 @@ if conf.profile then
     nuchan = 3
     zdim = res
   end
+  print('batch')
   -- Create a minimal (empty) batch to do a few FPROPs.
   local batchGPU = {
      pDiv = torch.CudaTensor(1, 1, zdim, res, res):fill(0), 
