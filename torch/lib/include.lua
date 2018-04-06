@@ -20,16 +20,16 @@ local torch = require('torch')
 
 dofile('lib/load_package_safe.lua')
 
-local cutorch = torch.loadPackageSafe('cutorch')
-torch.loadPackageSafe('cunn')
+--local cutorch = torch.loadPackageSafe('cutorch')
+--torch.loadPackageSafe('cunn')
 require 'image'
 local optim = require('optim')
 require 'gnuplot'
-local cudnn = torch.loadPackageSafe('cudnn')
-if cudnn ~= nil then
-  -- cudnn.benchmark = true
-  cudnn.fastest = true  -- Use this instead of 'benchmark' if unstable.
-end
+--local cudnn = torch.loadPackageSafe('cudnn')
+--if cudnn ~= nil then
+--  -- cudnn.benchmark = true
+--  cudnn.fastest = true  -- Use this instead of 'benchmark' if unstable.
+--end
 require 'nngraph'
 require 'tfluids'
 torch.loadPackageSafe('qt')
@@ -93,9 +93,10 @@ dofile('lib/calc_flops.lua')
 torch.setdefaulttensortype('torch.FloatTensor')
 torch.setnumthreads(8)
 torch.manualSeed(1)
-if cutorch ~= nil then
-  cutorch.manualSeed(1)
-end
+--TODO Be sure this is correct!
+--if cutorch ~= nil then
+--  cutorch.manualSeed(1)
+--end
 math.randomseed(1)
 
 if math.mod == nil then

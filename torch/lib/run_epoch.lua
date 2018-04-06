@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-local cunn = require('cunn')
+--local cunn = require('cunn')
 local sys = require('sys')
 local tfluids = require('tfluids')
 local mattorch = torch.loadPackageSafe('mattorch')

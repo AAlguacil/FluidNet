@@ -21,7 +21,6 @@ local glut = require('libLuaGlut')
 local tfluids = require('tfluids')
 dofile("lib/include.lua")
 local emitter = dofile("lib/emitter.lua")
-
 -- ****************************** Define Config ********************************
 local conf = torch.defaultConf()
 conf.batchSize = 1
@@ -31,9 +30,9 @@ assert(conf.batchSize == 1, 'The batch size must be one')
 assert(conf.loadModel == true, 'You must load a pre-trained model')
 
 -- ****************************** Select the GPU *******************************
-cutorch.setDevice(conf.gpu)
-print("GPU That will be used (id = " .. conf.gpu .. "):")
-print(cutorch.getDeviceProperties(conf.gpu))
+--cutorch.setDevice(conf.gpu)
+--print("GPU That will be used (id = " .. conf.gpu .. "):")
+--print(cutorch.getDeviceProperties(conf.gpu))
 
 -- **************************** Load data from Disk ****************************
 -- We use this in the visualization demo to seed the velocity and flag fields.

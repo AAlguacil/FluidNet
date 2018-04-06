@@ -55,7 +55,8 @@ function SpatialDivisiveNormalizationBatch:__init(nInputPlane, kernel,
   self.modules[MEAN_ESTIMATOR] = nn.Sequential()
   self.modules[MEAN_ESTIMATOR]:add(nn.SpatialZeroPadding(padW, padW, padH,
                                                          padH))
-  self.modules[MEAN_ESTIMATOR]:add(cudnn.SpatialConvolution(
+       -- Replaced cudnn by nn (only first call)
+  self.modules[MEAN_ESTIMATOR]:add(nn.SpatialConvolution(
       self.nInputPlane, 1, self.kernel:size(2), self.kernel:size(1)))
   self.modules[MEAN_ESTIMATOR]:add(nn.Replicate(self.nInputPlane))
   self.modules[MEAN_ESTIMATOR]:add(nn.Transpose({1, 2}))
@@ -64,7 +65,8 @@ function SpatialDivisiveNormalizationBatch:__init(nInputPlane, kernel,
   self.modules[STD_ESTIMATOR] = nn.Sequential()
   self.modules[STD_ESTIMATOR]:add(nn.Square())
   self.modules[STD_ESTIMATOR]:add(nn.SpatialZeroPadding(padW, padW, padH, padH))
-  self.modules[STD_ESTIMATOR]:add(cudnn.SpatialConvolution(
+       -- Replaced cudnn by nn
+  self.modules[STD_ESTIMATOR]:add(nn.SpatialConvolution(
       self.nInputPlane, 1, self.kernel:size(2), self.kernel:size(1)))
   self.modules[STD_ESTIMATOR]:add(nn.Replicate(self.nInputPlane))
   self.modules[STD_ESTIMATOR]:add(nn.Sqrt())

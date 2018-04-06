@@ -13,7 +13,7 @@
 -- limitations under the License.
 
 local nn = require('nn')
-local cudnn = require('cudnn')
+--local cudnn = require('cudnn')
 local tfluids = require('tfluids')
 
 local inPlaceReLU = true

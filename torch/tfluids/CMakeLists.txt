@@ -16,10 +16,11 @@ IF(OPENMP_FOUND)
   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 ENDIF(OPENMP_FOUND)
 
-FIND_PACKAGE(CUDA 7.5 REQUIRED)
+#FIND_PACKAGE(CUDA 7.5 REQUIRED)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/generic)
-LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_61;--use_fast_math; -D_FORCE_INLINES")
-MESSAGE("Compiling for CUDA architecture 6.1")
+#APPEND CUDA_NVCC_FLAGS "-arch=sm_61;
+LIST(APPEND "--use_fast_math; -D_FORCE_INLINES")
+#MESSAGE("Compiling for CUDA architecture 6.1")
 FIND_PACKAGE(GLUT REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 
@@ -63,7 +64,7 @@ SET(luasrc init.lua flags_to_occupancy.lua set_wall_bcs.lua test_tfluids.lua vel
 if (WITH_CUDA)
   SET(src init.cu generic/tfluids.cu generic/tfluids.cu.h generic/advect_type.cc)
 ELSE()
-  SET(src init.cu generic/advect_type.cc)
+  SET(src init.cc generic/advect_type.cc)
 ENDIF()
 
 ADD_TORCH_PACKAGE(tfluids "${src}" "${luasrc}" "Torch Fluids utility lib.")

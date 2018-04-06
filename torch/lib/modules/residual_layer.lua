@@ -19,7 +19,7 @@
 -- http://torch.ch/blog/2016/02/04/resnets.html - "reference paper" version).
 
 local nn = require('nn')
-local cudnn = require('cudnn')
+--local cudnn = require('cudnn')
 
 local ResidualLayer, parent = torch.class('nn.ResidualLayer', 'nn.Container')
 
@@ -67,24 +67,29 @@ function ResidualLayer:__init(nInputPlane, nOutputPlaneStage1,
 
   local branch1 = nn.Sequential()
   -- First Convolution.
-  branch1:add(cudnn.SpatialConvolution(
+        -- Replaced cudnn by nn
+  branch1:add(nn.SpatialConvolution(
       self.nInputPlane, self.nOutputPlaneStage1, self.kW, self.kH, self.dW,
       self.dH, self.padW, self.padH))
   -- Batch Norm (optional).
   if self.addBatchNorm then
-    branch1:add(cudnn.SpatialBatchNormalization(
+        -- Replaced cudnn by nn
+    branch1:add(nn.SpatialBatchNormalization(
         self.nOutputPlaneStage1, self.batchNormEps, self.batchNormMom,
         self.batchNormAffine))
   end
   -- ReLU.
-  branch1:add(cudnn.ReLU(true))  -- In-place.
+        -- Replaced cudnn by nn
+  branch1:add(nn.ReLU(true))  -- In-place.
   -- Second Convolution.
-  branch1:add(cudnn.SpatialConvolution(
+        -- Replaced cudnn by nn
+  branch1:add(nn.SpatialConvolution(
       self.nOutputPlaneStage1, self.nOutputPlane, self.kW, self.kH,
       self.dW, self.dH, self.padW, self.padH))
   -- Batch Norm (optional).
   if self.addBatchNorm then
-    branch1:add(cudnn.SpatialBatchNormalization(
+        -- Replaced cudnn by nn
+    branch1:add(nn.SpatialBatchNormalization(
         self.nOutputPlane, self.batchNormEps, self.batchNormMom,
         self.batchNormAffine))
   end
@@ -95,11 +100,13 @@ function ResidualLayer:__init(nInputPlane, nOutputPlaneStage1,
   else
     if not self.identityShortcut then
       -- Scale feature dim using 1x1 convolution.
-      branch2 = cudnn.SpatialConvolution(self.nInputPlane, self.nOutputPlane,
+        -- Replaced cudnn by nn
+      branch2 = nn.SpatialConvolution(self.nInputPlane, self.nOutputPlane,
                                          1, 1, 1, 1, 0, 0)
       -- Batch Norm (optional).
       if self.addBatchNorm then
-        branch1:add(cudnn.SpatialBatchNormalization(
+        -- Replaced cudnn by nn
+        branch1:add(nn.SpatialBatchNormalization(
             self.nOutputPlane, self.batchNormEps, self.batchNormMom,
             self.batchNormAffine))
       end
@@ -124,7 +131,8 @@ function ResidualLayer:__init(nInputPlane, nOutputPlaneStage1,
   -- Addition.
   net:add(nn.CAddTable())
   -- ReLU.
-  net:add(cudnn.ReLU(true))  -- In-place.
+      -- Replaced cudnn by nn
+  net:add(nn.ReLU(true))  -- In-place.
 
   self.modules = {net}
 

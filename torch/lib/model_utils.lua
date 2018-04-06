@@ -13,7 +13,7 @@
 -- limitations under the License.
 
 local nn = require('nn')
-local cudnn = require('cudnn')
+--local cudnn = require('cudnn')
 
 local inPlaceReLU = true
 
@@ -32,16 +32,17 @@ function torch.addNonlinearity(mconf, input)
         tostring(inPlaceReLU) .. ')')
   return nonlin(input)
 end
-
 function torch.addBN(mconf, input, ofeats)
   local bn
   if mconf.batchNormAffine then
     if not mconf.is3D then
-      bn = cudnn.SpatialBatchNormalization(
+      -- replaced cudnn by nn
+      bn = nn.SpatialBatchNormalization(
           ofeats, mconf.batchNormEps, mconf.batchNormMom,
           mconf.batchNormAffine)
     else
-      bn = cudnn.VolumetricBatchNormalization(
+      -- replaced cudnn by nn
+      bn = nn.VolumetricBatchNormalization(
           ofeats, mconf.batchNormEps, mconf.batchNormMom,
           mconf.batchNormAffine)
     end
@@ -73,16 +74,18 @@ local function getConvLayer(mconf, ifeats, ofeats, k, up, rank, interFeats,
         assert(rank == 2, 'Upsampling layers must be full rank')
         conv = nn.SpatialConvolutionUpsample(
             ifeats, ofeats, k, k, 1, 1, pad, pad, up, up)
-        cudnn.convert(conv, cudnn)  -- Convert the inner convolution to cudnn.
+        --cudnn.convert(conv, cudnn)  -- Convert the inner convolution to cudnn.
       else
         if rank == 1 then
           conv = nn.Sequential()
-          conv:add(cudnn.SpatialConvolution(
+          -- replaced cudnn by nn
+          conv:add(nn.SpatialConvolution(
               ifeats, interFeats, k, 1, 1, 1, pad, 0))
-          conv:add(cudnn.SpatialConvolution(
+          conv:add(nn.SpatialConvolution(
               interFeats, ofeats, 1, k, 1, 1, 0, pad))
         elseif rank == 2 then
-          conv = cudnn.SpatialConvolution(ifeats, ofeats, k, k, 1, 1, pad, pad)
+         -- replaced cudnn by nn 
+         conv = nn.SpatialConvolution(ifeats, ofeats, k, k, 1, 1, pad, pad)
         else
           error('rank ' .. rank .. ' is invalid (1 or 2)')
         end
@@ -92,27 +95,31 @@ local function getConvLayer(mconf, ifeats, ofeats, k, up, rank, interFeats,
         assert(rank == 3, 'Upsampling layers must be full rank')
         conv = nn.VolumetricConvolutionUpsample(
             ifeats, ofeats, k, k, k, 1, 1, 1, pad, pad, pad, up, up, up)
-        cudnn.convert(conv, cudnn)  -- Convert the inner convolution to cudnn.
+        --cudnn.convert(conv, cudnn)  -- Convert the inner convolution to cudnn.
       else
         if rank == 1 then
           -- There are LOTS of ways of partitioning the 3D conv into a low rank
           -- approximation (order, number of features, etc).
           -- We're just going to arbitrarily choose just one low rank approx.
           conv = nn.Sequential()
-          conv:add(cudnn.VolumetricConvolution(
+          -- Replaced cudnn by nn
+          conv:add(nn.VolumetricConvolution(
               ifeats, interFeats, k, 1, 1, 1, 1, 1, pad, 0, 0))
-          conv:add(cudnn.VolumetricConvolution(
+          conv:add(nn.VolumetricConvolution(
               interFeats, interFeats, 1, k, 1, 1, 1, 1, 0, pad, 0))
-          conv:add(cudnn.VolumetricConvolution(
+          conv:add(nn.VolumetricConvolution(
               interFeats, ofeats, 1, 1, k, 1, 1, 1, 0, 0, pad))
         elseif rank == 2 then
           conv = nn.Sequential()
-          conv:add(cudnn.VolumetricConvolution(
+          -- Replaced cudnn by nn
+          conv:add(nn.VolumetricConvolution(
               ifeats, interFeats, k, k, 1, 1, 1, 1, pad, pad, 0))
-          conv:add(cudnn.VolumetricConvolution(
+          -- Replaced cudnn by nn
+          conv:add(nn.VolumetricConvolution(
               interFeats, ofeats, 1, k, k, 1, 1, 1, 0, pad, pad))
         elseif rank == 3 then
-          conv = cudnn.VolumetricConvolution(
+          -- Replaced cudnn by nn
+          conv = nn.VolumetricConvolution(
               ifeats, ofeats, k, k, k, 1, 1, 1, pad, pad, pad)
         else
           error('rank ' .. tostring(rank) .. ' is invalid (1, 2 or 3)')
@@ -185,17 +192,21 @@ function torch.addPooling(mconf, input, size)
   local pool
   if not mconf.is3D then
     if mconf.poolType == 'avg' then
-      pool = cudnn.SpatialAveragePooling(size, size, size, size)
+      -- Replaced cudnn by nn
+      pool = nn.SpatialAveragePooling(size, size, size, size)
     elseif mconf.poolType == 'max' then
-      pool = cudnn.SpatialMaxPooling(size, size, size, size)
+      -- Replaced cudnn by nn
+      pool = nn.SpatialMaxPooling(size, size, size, size)
     else
       error("Bad pool type.  Must be 'avg' or 'max'")
     end
   else
     if mconf.poolType == 'avg' then
-      pool = cudnn.VolumetricAveragePooling(size, size, size, size, size, size)
+      -- Replaced cudnn by nn
+      pool = nn.VolumetricAveragePooling(size, size, size, size, size, size)
     elseif mconf.poolType == 'max' then
-      pool = cudnn.VolumetricMaxPooling(size, size, size, size, size, size)
+      -- Replaced cudnn by nn
+      pool = nn.VolumetricMaxPooling(size, size, size, size, size, size)
     else
       error("Bad pool type.  Must be 'avg' or 'max'")
     end
