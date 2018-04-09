@@ -42,7 +42,7 @@ local te = torch.loadSet(conf, 'te') -- Instance of DataBinary.
 -- ***************************** Create the model ******************************
 conf.modelDirname = conf.modelDir .. '/' .. conf.modelFilename
 local mconf, model = torch.loadModel(conf.modelDirname)
-model:cuda()
+--model:cuda()
 print('==> Loaded model from: ' .. conf.modelDirname)
 torch.setDropoutTrain(model, false)
 assert(mconf.is3D == tr.is3D, 'Model data dimension mismatch')

@@ -22,8 +22,8 @@
 -- >> qlua fluid_net_train.lua -help
 
 dofile('lib/include.lua')
-local cudnn = torch.loadPackageSafe('cudnn')
-local cutorch = torch.loadPackageSafe('cutorch')
+--local cudnn = torch.loadPackageSafe('cudnn')
+--local cutorch = torch.loadPackageSafe('cutorch')
 local paths = require('paths')
 local optim = require('optim')
 local mattorch = torch.loadPackageSafe('mattorch')
@@ -36,9 +36,9 @@ torch.makeGlobal('_conf', conf)
 conf.modelDirname = conf.modelDir .. '/' .. conf.modelFilename
 
 -- ****************************** Select the GPU *******************************
-cutorch.setDevice(conf.gpu)
-print("GPU That will be used:")
-print(cutorch.getDeviceProperties(conf.gpu))
+--cutorch.setDevice(conf.gpu)
+--print("GPU That will be used:")
+--print(cutorch.getDeviceProperties(conf.gpu))
 
 -- **************************** Load data from Disk ****************************
 local tr = torch.loadSet(conf, 'tr') --Instance of DataBinary
@@ -74,8 +74,8 @@ else
   assert(not conf.resumeTraining,
          'Cant resume training without loading a model!')
   model, mconf = torch.defineModel(conf, tr) -- in model.lua
-  model:cuda()
-  print('passed cuda')
+--  model:cuda()
+--  print('passed cuda')
 -- beniz: buggy
 -- Visualize the model to file.
 --  if torch.loadPackageSafe('learning.lua.file') == nil then
@@ -102,7 +102,7 @@ end
 
 criterion.sizeAverage = true
 torch.makeGlobal('_criterion', criterion)
-criterion:cuda()
+--criterion:cuda()
 print('    using criterion ' .. criterion:__tostring())
 
 -- ***************************** Get the parameters ****************************
@@ -162,23 +162,29 @@ if conf.profile then
   end
   print('batch')
   -- Create a minimal (empty) batch to do a few FPROPs.
-  local batchGPU = {
-     pDiv = torch.CudaTensor(1, 1, zdim, res, res):fill(0), 
-     UDiv = torch.CudaTensor(1, nuchan, zdim, res, res):fill(0),
-     flags = tfluids.emptyDomain(torch.CudaTensor(1, 1, zdim, res, res),
+  --local batchGPU = {
+  --   pDiv = torch.CudaTensor(1, 1, zdim, res, res):fill(0), 
+  --   UDiv = torch.CudaTensor(1, nuchan, zdim, res, res):fill(0),
+  --   flags = tfluids.emptyDomain(torch.CudaTensor(1, 1, zdim, res, res),
+  --                               mconf.is3D)
+  --}
+  local batchCPU = {
+     pDiv = torch.Tensor(1, 1, zdim, res, res):fill(0), 
+     UDiv = torch.Tensor(1, nuchan, zdim, res, res):fill(0),
+     flags = tfluids.emptyDomain(torch.Tensor(1, 1, zdim, res, res),
                                  mconf.is3D)
   }
   model:evaluate()  -- Turn off training (so batch norm doesn't get messed up).
   local input = torch.getModelInput(batchGPU)
   model:forward(input)  -- Input once before we start profiling.
-  cutorch.synchronize()  -- Make sure everything is allocated fully.
+  -- cutorch.synchronize()  -- Make sure everything is allocated fully.
   sys.tic()
   local niters = 0
   while sys.toc() < profileTime do
     model:forward(input)
     niters = niters + 1
   end
-  cutorch.synchronize()  -- Flush the GPU buffer.
+ -- cutorch.synchronize()  -- Flush the GPU buffer.
   local fpropTime = sys.toc() / niters
   print('    FPROP Time: ' .. 1000 * fpropTime .. ' ms / sample')
 
